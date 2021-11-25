@@ -331,6 +331,7 @@ fft_objects :=							\
 
 # explicit targets and dependencies
 fft_includes :=							\
+	src/fft/src/fft_arm_dsp.c					\
 	src/fft/src/fft_common.c				\
 	src/fft/src/fft_dft.c					\
 	src/fft/src/fft_radix2.c				\

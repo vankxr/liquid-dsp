@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "arm_math.h"
 #include "liquid.internal.h"
 
 struct FFT(plan_s)
@@ -48,6 +49,11 @@ struct FFT(plan_s)
 
     // common data structure shared between specific FFT algorithms
     union {
+        // ARM DSP library
+        struct {
+            const arm_cfft_instance_f32 * instance;
+        } arm;
+
         // DFT
         struct {
             TC * twiddle;               // twiddle factors
@@ -138,6 +144,10 @@ FFT(plan) FFT(_create_plan)(unsigned int _nfft,
         // use slow DFT
         return FFT(_create_plan_dft)(_nfft, _x, _y, _dir, _flags);
 
+    case LIQUID_FFT_METHOD_ARM_DSP:
+        // use slow DFT
+        return FFT(_create_plan_arm_dsp)(_nfft, _x, _y, _dir, _flags);
+
     case LIQUID_FFT_METHOD_UNKNOWN:
     default:;
     }
@@ -152,6 +162,7 @@ int FFT(_destroy_plan)(FFT(plan) _q)
     case LIQUID_FFT_FORWARD:
     case LIQUID_FFT_BACKWARD:
         switch (_q->method) {
+        case LIQUID_FFT_METHOD_ARM_DSP:     return FFT(_destroy_plan_arm_dsp)(_q);
         case LIQUID_FFT_METHOD_DFT:         return FFT(_destroy_plan_dft)(_q);
         case LIQUID_FFT_METHOD_RADIX2:      return FFT(_destroy_plan_radix2)(_q);
         case LIQUID_FFT_METHOD_MIXED_RADIX: return FFT(_destroy_plan_mixed_radix)(_q);
@@ -196,6 +207,7 @@ int FFT(_print_plan)(FFT(plan) _q)
                 _q->direction == LIQUID_FFT_FORWARD ? "forward" : "reverse",
                 _q->nfft);
         switch (_q->method) {
+        case LIQUID_FFT_METHOD_ARM_DSP:     printf("ARM DSP library\n");     break;
         case LIQUID_FFT_METHOD_DFT:         printf("DFT\n");                break;
         case LIQUID_FFT_METHOD_RADIX2:      printf("Radix-2\n");            break;
         case LIQUID_FFT_METHOD_MIXED_RADIX: printf("Cooley-Tukey\n");       break;
@@ -240,6 +252,10 @@ int FFT(_print_plan_recursive)(FFT(plan)    _q,
     printf("%u, ", _q->nfft);
 
     switch (_q->method) {
+    case LIQUID_FFT_METHOD_ARM_DSP:
+        printf("ARM DSP library\n");
+        break;
+
     case LIQUID_FFT_METHOD_DFT:
         printf("DFT\n");
         break;

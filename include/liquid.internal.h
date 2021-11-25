@@ -683,6 +683,7 @@ typedef enum {
     LIQUID_FFT_METHOD_RADER,        // Rader's method for FFTs of prime length
     LIQUID_FFT_METHOD_RADER2,       // Rader's method for FFTs of prime length (alternate)
     LIQUID_FFT_METHOD_DFT,          // regular discrete Fourier transform
+    LIQUID_FFT_METHOD_ARM_DSP,      // FFT using ARM DSP library
 } liquid_fft_method;
 
 // Macro    :   FFT (internal)
@@ -705,6 +706,7 @@ typedef int (FFT(_destroy_t))(FFT(plan) _q);                    \
 typedef int (FFT(_execute_t))(FFT(plan) _q);                    \
                                                                 \
 /* FFT create methods */                                        \
+FFT(_create_t) FFT(_create_plan_arm_dsp);                       \
 FFT(_create_t) FFT(_create_plan_dft);                           \
 FFT(_create_t) FFT(_create_plan_radix2);                        \
 FFT(_create_t) FFT(_create_plan_mixed_radix);                   \
@@ -712,6 +714,7 @@ FFT(_create_t) FFT(_create_plan_rader);                         \
 FFT(_create_t) FFT(_create_plan_rader2);                        \
                                                                 \
 /* FFT destroy methods */                                       \
+FFT(_destroy_t) FFT(_destroy_plan_arm_dsp);                     \
 FFT(_destroy_t) FFT(_destroy_plan_dft);                         \
 FFT(_destroy_t) FFT(_destroy_plan_radix2);                      \
 FFT(_destroy_t) FFT(_destroy_plan_mixed_radix);                 \
@@ -719,6 +722,7 @@ FFT(_destroy_t) FFT(_destroy_plan_rader);                       \
 FFT(_destroy_t) FFT(_destroy_plan_rader2);                      \
                                                                 \
 /* FFT execute methods */                                       \
+FFT(_execute_t) FFT(_execute_arm_dsp);                          \
 FFT(_execute_t) FFT(_execute_dft);                              \
 FFT(_execute_t) FFT(_execute_radix2);                           \
 FFT(_execute_t) FFT(_execute_mixed_radix);                      \

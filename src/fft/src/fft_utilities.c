@@ -37,7 +37,9 @@ liquid_fft_method liquid_fft_estimate_method(unsigned int _nfft)
         // invalid length
         fprintf(stderr,"error: liquid_fft_estimate_method(), fft size must be > 0\n");
         return LIQUID_FFT_METHOD_UNKNOWN;
-
+    } else if (_nfft==16 || _nfft==32 || _nfft==64 || _nfft==128 || _nfft==256 || _nfft==512 || _nfft==1024 || _nfft==2048 || _nfft==4096) {
+        // use ARM DSP library for power of 2 sizes
+        return LIQUID_FFT_METHOD_ARM_DSP;
     } else if (_nfft <= 8 || _nfft==11 || _nfft==13 || _nfft==16 || _nfft==17) {
         // use simple DFT
         return LIQUID_FFT_METHOD_DFT;
