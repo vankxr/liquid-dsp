@@ -206,6 +206,12 @@ else
                        src/dotprod/src/dotprod_crcf.av.o \
                        src/dotprod/src/sumsq.o"
         ARCH_OPTION="-fno-common -faltivec";;
+    arm)
+        MLIBS_DOTPROD="src/dotprod/src/dotprod_cccf.arm.o \
+                       src/dotprod/src/dotprod_crcf.arm.o \
+                       src/dotprod/src/dotprod_rrrf.arm.o \
+                       src/dotprod/src/sumsq.arm.o"
+        ARCH_OPTION="-ffast-math";;
     armv1*|armv2*|armv3*|armv4*|armv5*|armv6*)
         # assume neon instructions are NOT available
         MLIBS_DOTPROD="src/dotprod/src/dotprod_cccf.o \
