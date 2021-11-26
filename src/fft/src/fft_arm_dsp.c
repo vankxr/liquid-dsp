@@ -91,7 +91,7 @@ int FFT(_destroy_plan_arm_dsp)(FFT(plan) _q)
 int FFT(_execute_arm_dsp)(FFT(plan) _q)
 {
 #if __ARM_FEATURE_DSP == 1
-    memcpy(_q->y, _q->x, _q->nfft * sizeof(TC));
+    arm_copy_f32((float *)_q->x, (float *)_q->y, _q->nfft);
 
     // Executes in place
     arm_cfft_f32(_q->data.arm.instance, (float *)_q->y, _q->direction == LIQUID_FFT_FORWARD ? 0 : 1, 1);
