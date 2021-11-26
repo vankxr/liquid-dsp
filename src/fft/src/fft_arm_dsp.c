@@ -27,8 +27,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#if __ARM_FEATURE_DSP == 1
 #include "arm_math.h"
 #include "arm_const_structs.h"
+#endif
 #include "liquid.internal.h"
 
 // create FFT plan for ARM DSP library FFT
@@ -43,6 +45,7 @@ FFT(plan) FFT(_create_plan_arm_dsp)(unsigned int _nfft,
                                 int          _dir,
                                 int          _flags)
 {
+#if __ARM_FEATURE_DSP == 1
     // allocate plan and initialize all internal arrays to NULL
     FFT(plan) q = (FFT(plan)) malloc(sizeof(struct FFT(plan_s)));
 
@@ -67,24 +70,35 @@ FFT(plan) FFT(_create_plan_arm_dsp)(unsigned int _nfft,
     else if (q->nfft == 4096) q->data.arm.instance = &arm_cfft_sR_f32_len4096;
 
     return q;
+#else
+    return LIQUID_EUMODE;
+#endif
 }
 
 // destroy FFT plan
 int FFT(_destroy_plan_arm_dsp)(FFT(plan) _q)
 {
+#if __ARM_FEATURE_DSP == 1
     // free main object memory
     free(_q);
     return LIQUID_OK;
+#else
+    return LIQUID_EUMODE;
+#endif
 }
 
 // execute FFT
 int FFT(_execute_arm_dsp)(FFT(plan) _q)
 {
+#if __ARM_FEATURE_DSP == 1
     memcpy(_q->y, _q->x, _q->nfft * sizeof(TC));
 
     // Executes in place
     arm_cfft_f32(_q->data.arm.instance, (float *)_q->y, _q->direction == LIQUID_FFT_FORWARD ? 0 : 1, 1);
 
     return LIQUID_OK;
+#else
+    return LIQUID_EUMODE;
+#endif
 }
 
