@@ -48,7 +48,10 @@ fec fec_rs_create(fec_scheme _fs)
     q->decode_soft_func = NULL;
 
     switch (q->scheme) {
-    case LIQUID_FEC_RS_M8: fec_rs_init_p8(q); break;
+    case LIQUID_FEC_RS_M8:              fec_rs_init_p8(q); break;
+    case LIQUID_FEC_RS_M8_K223_CCSDS:   fec_rs_init_p8_k223_ccsds(q); break;
+    case LIQUID_FEC_RS_M8_K239_CCSDS:   fec_rs_init_p8_k239_ccsds(q); break;
+    case LIQUID_FEC_RS_M8_DVB:          fec_rs_init_p8_dvb(q); break;
     default: return liquid_error_config("fec_rs_create(), invalid type");
     }
 
@@ -274,6 +277,7 @@ int fec_rs_setlength(fec _q, unsigned int _dec_msg_len)
 // internal
 //
 
+// Liquid
 int fec_rs_init_p8(fec _q)
 {
     _q->symsize = 8;
@@ -281,6 +285,40 @@ int fec_rs_init_p8(fec _q)
     _q->fcs = 1;
     _q->prim = 1;
     _q->nroots = 32;
+    return LIQUID_OK;
+}
+
+// CCSDS RS(255, 223)
+int fec_rs_init_p8_k223_ccsds(fec _q)
+{
+    _q->symsize = 8;
+    _q->genpoly = 0x187;
+    _q->fcs = 112;
+    _q->prim = 11;
+    _q->nroots = 32;
+    return LIQUID_OK;
+}
+
+// CCSDS RS(255, 239)
+int fec_rs_init_p8_k239_ccsds(fec _q)
+{
+    _q->symsize = 8;
+    _q->genpoly = 0x187;
+    _q->fcs = 120;
+    _q->prim = 11;
+    _q->nroots = 16;
+    return LIQUID_OK;
+}
+
+// DVB RS(204, 188) shortened from RS(255, 239)
+// Also used in ADSL
+int fec_rs_init_p8_dvb(fec _q)
+{
+    _q->symsize = 8;
+    _q->genpoly = 0x11d;
+    _q->fcs = 0;
+    _q->prim = 1;
+    _q->nroots = 16;
     return LIQUID_OK;
 }
 

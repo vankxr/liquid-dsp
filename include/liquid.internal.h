@@ -583,6 +583,9 @@ unsigned int fec_rs_get_enc_msg_len(unsigned int _dec_msg_len,
 fec fec_rs_create(fec_scheme _fs);
 int fec_rs_destroy(fec _q);
 int fec_rs_init_p8(fec _q);
+int fec_rs_init_p8_k223_ccsds(fec _q);
+int fec_rs_init_p8_k239_ccsds(fec _q);
+int fec_rs_init_p8_dvb(fec _q);
 int fec_rs_setlength(fec _q,
                      unsigned int _dec_msg_len);
 int fec_rs_encode(fec _q,
