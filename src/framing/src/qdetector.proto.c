@@ -44,8 +44,10 @@ int QDETECTOR(_execute_align)(QDETECTOR() _q, TI _x);
 struct QDETECTOR(_s) {
     unsigned int    s_len;          // template (time) length: k * (sequence_len + 2*m)
     TI *            s;              // template (time), [size: s_len x 1]
-    TI *            S;              // template (freq), [size: nfft x 1]
+    TI *            s_bar;          // template (time), conj, [size: nfft x 1]
+    TI *            S_bar;          // template (freq), conj, [size: nfft x 1]
     float           s2_sum;         // sum{ s^2 }
+    float           s_rms;          // sqrt( sum{ s^2 } )
 
     TI *            buf_time_0;     // time-domain buffer (FFT)
     TI *            buf_freq_0;     // frequence-domain buffer (FFT)
@@ -55,11 +57,16 @@ struct QDETECTOR(_s) {
     FFT_PLAN        fft;            // FFT object:  buf_time_0 > buf_freq_0
     FFT_PLAN        ifft;           // IFFT object: buf_freq_1 > buf_freq_1
 
+    float           g0_1;           // sqrt(s_len/(nfft/2))
+    float           g0_2;           // sqrt(s_len/nfft)
+
     unsigned int    counter;        // sample counter for determining when to compute FFTs
     float           threshold;      // detection threshold
     float           dphi_max;       // carrier offset search range (radians/sample)
     int             range;          // carrier offset search range (subcarriers)
+#if DEBUG_QDETECTOR
     unsigned int    num_transforms; // number of transforms taken (debugging)
+#endif
 
     float           x2_sum_0;       // sum{ |x|^2 } of first half of buffer
     float           x2_sum_1;       // sum{ |x|^2 } of second half of buffer
@@ -87,7 +94,7 @@ QDETECTOR() QDETECTOR(_create)(TI *         _s,
     // validate input
     if (_s_len == 0)
         return liquid_error_config("QDETECTOR(_create)(), sequence length cannot be zero");
-    
+
     // allocate memory for main object and set internal properties
     QDETECTOR() q = (QDETECTOR()) malloc(sizeof(struct QDETECTOR(_s)));
     q->s_len = _s_len;
@@ -95,7 +102,13 @@ QDETECTOR() QDETECTOR(_create)(TI *         _s,
     // allocate memory and copy sequence
     q->s = (TI*) malloc(q->s_len * sizeof(TI));
     memmove(q->s, _s, q->s_len*sizeof(TI));
+    q->s_bar = (TI*) malloc(q->s_len * sizeof(TI));
+
+    for(unsigned int i=0; i<q->s_len; i++)
+        q->s_bar[i] = conjf(q->s[i]);
+
     q->s2_sum = liquid_sumsqcf(q->s, q->s_len); // compute sum{ s^2 }
+    q->s_rms  = sqrtf(q->s2_sum);
 
     // prepare transforms
     q->nfft       = 1 << liquid_nextpow2( (unsigned int)( 2 * q->s_len ) ); // NOTE: must be even
@@ -108,21 +121,28 @@ QDETECTOR() QDETECTOR(_create)(TI *         _s,
     q->ifft = FFT_CREATE_PLAN(q->nfft, q->buf_freq_1, q->buf_time_1, FFT_DIR_BACKWARD, 0);
 
     // create frequency-domain template by taking nfft-point transform on 's', storing in 'S'
-    q->S = (TI*) malloc(q->nfft * sizeof(TI));
+    q->S_bar = (TI*) malloc(q->nfft * sizeof(TI));
     memset(q->buf_time_0, 0x00, q->nfft*sizeof(TI));
     memmove(q->buf_time_0, q->s, q->s_len*sizeof(TI));
     FFT_EXECUTE(q->fft);
-    memmove(q->S, q->buf_freq_0, q->nfft*sizeof(TI));
+
+    for(unsigned int i=0; i<q->nfft; i++)
+        q->S_bar[i] = conjf(q->buf_freq_0[i]);
+
+    q->g0_1 = sqrtf((float)q->s_len / (float)(q->nfft / 2));
+    q->g0_2 = sqrtf((float)q->s_len / (float)q->nfft);
 
     // reset state variables
     q->counter        = q->nfft/2;
+#if DEBUG_QDETECTOR
     q->num_transforms = 0;
+#endif
     q->x2_sum_0       = 0.0f;
     q->x2_sum_1       = 0.0f;
     q->state          = QDETECTOR_STATE_SEEK;
     q->frame_detected = 0;
     memset(q->buf_time_0, 0x00, q->nfft*sizeof(TI));
-    
+
     // reset estimates
     q->rxy       = 0.0f;
     q->tau_hat   = 0.0f;
@@ -161,7 +181,7 @@ QDETECTOR() QDETECTOR(_create_linear)(TI *         _sequence,
         return liquid_error_config("QDETECTOR(_create_linear)(), filter delay must be in [1,100]");
     if (_beta < 0.0f || _beta > 1.0f)
         return liquid_error_config("QDETECTOR(_create_linear)(), excess bandwidth factor must be in [0,1]");
-    
+
     // create time-domain template
     unsigned int    s_len = _k * (_sequence_len + 2*_m);
     TI * s     = (TI*) malloc(s_len * sizeof(TI));
@@ -202,7 +222,7 @@ QDETECTOR() QDETECTOR(_create_gmsk)(unsigned char * _sequence,
         return liquid_error_config("QDETECTOR(_create_gmsk)(), filter delay must be in [1,100]");
     if (_beta < 0.0f || _beta > 1.0f)
         return liquid_error_config("QDETECTOR(_create_gmsk)(), excess bandwidth factor must be in [0,1]");
-    
+
     // create time-domain template using GMSK modem
     unsigned int    s_len = _k * (_sequence_len + 2*_m);
     TI * s     = (TI*) malloc(s_len * sizeof(TI));
@@ -290,7 +310,9 @@ QDETECTOR() QDETECTOR(_copy)(QDETECTOR() q_orig)
     q_copy->threshold       = q_orig->threshold;
     q_copy->dphi_max        = q_orig->dphi_max;
     q_copy->range           = q_orig->range;
+#if DEBUG_QDETECTOR
     q_copy->num_transforms  = q_orig->num_transforms;
+#endif
     // buffer power magnitude
     q_copy->x2_sum_0        = q_orig->x2_sum_0;
     q_copy->x2_sum_1        = q_orig->x2_sum_1;
@@ -306,7 +328,8 @@ int QDETECTOR(_destroy)(QDETECTOR() _q)
 {
     // free allocated arrays
     free(_q->s);
-    free(_q->S);
+    free(_q->s_bar);
+    free(_q->S_bar);
     FFT_FREE(_q->buf_time_0);
     FFT_FREE(_q->buf_freq_0);
     FFT_FREE(_q->buf_freq_1);
@@ -468,7 +491,7 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
 
     if (_q->counter < _q->nfft)
         return LIQUID_OK;
-    
+
     // reset counter (last half of time buffer)
     _q->counter = _q->nfft/2;
 
@@ -478,9 +501,9 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
     // compute scaling factor (TODO: use median rather than mean signal level)
     float g0;
     if (_q->x2_sum_0 == 0.f) {
-        g0 = sqrtf(_q->x2_sum_1) * sqrtf((float)(_q->s_len) / (float)(_q->nfft / 2));
+        g0 = sqrtf(_q->x2_sum_1) * _q->g0_1;
     } else {
-        g0 = sqrtf(_q->x2_sum_0 + _q->x2_sum_1) * sqrtf((float)(_q->s_len) / (float)(_q->nfft));
+        g0 = sqrtf(_q->x2_sum_0 + _q->x2_sum_1) * _q->g0_2;
     }
     if (g0 < 1e-10) {
         memmove(_q->buf_time_0,
@@ -492,8 +515,8 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
         _q->x2_sum_1 = 0.0f;
         return LIQUID_OK;
     }
-    float g = 1.0f / ((float)(_q->nfft) * g0 * sqrtf(_q->s2_sum));
-    
+    float g = 1.0f / ((float)(_q->nfft) * g0 * _q->s_rms);
+
     // sweep over carrier frequency offset range
     int offset;
     unsigned int i;
@@ -508,14 +531,11 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
             // shifted index
             unsigned int j = (i + _q->nfft - offset) % _q->nfft;
 
-            _q->buf_freq_1[i] = _q->buf_freq_0[i] * conjf(_q->S[j]);
+            _q->buf_freq_1[i] = _q->buf_freq_0[i] * _q->S_bar[j];
         }
 
         // run inverse transform
         FFT_EXECUTE(_q->ifft);
-        
-        // scale output appropriately
-        liquid_vectorcf_mulscalar(_q->buf_time_1, _q->nfft, g, _q->buf_time_1);
 
 #if DEBUG_QDETECTOR
         // debug output
@@ -525,7 +545,7 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
         fprintf(fid,"clear all; close all;\n");
         fprintf(fid,"nfft = %u;\n", _q->nfft);
         for (i=0; i<_q->nfft; i++)
-            fprintf(fid,"rxy(%6u) = %12.4e + 1i*%12.4e;\n", i+1, crealf(_q->buf_time_1[i]), cimagf(_q->buf_time_1[i]));
+            fprintf(fid,"rxy(%6u) = %12.4e + 1i*%12.4e;\n", i+1, crealf(_q->buf_time_1[i]) * g, cimagf(_q->buf_time_1[i]) * g);
         fprintf(fid,"figure;\n");
         fprintf(fid,"t=[0:(nfft-1)];\n");
         fprintf(fid,"plot(t,abs(rxy));\n");
@@ -548,8 +568,12 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
         }
     }
 
+    rxy_peak *= g;
+
+#if DEBUG_QDETECTOR
     // increment number of transforms (debugging)
     _q->num_transforms++;
+#endif
 
     if (rxy_peak > _q->threshold && rxy_index < _q->nfft - _q->s_len) {
 #if DEBUG_QDETECTOR_PRINT
@@ -570,7 +594,7 @@ int QDETECTOR(_execute_seek)(QDETECTOR() _q, TI _x)
 #if DEBUG_QDETECTOR_PRINT
     printf(" no detect, rxy = %12.8f, time index=%u, freq. offset=%d\n", rxy_peak, rxy_index, rxy_offset);
 #endif
-    
+
     // copy last half of fft input buffer to front
     memmove(_q->buf_time_0, _q->buf_time_0 + _q->nfft/2, (_q->nfft/2)*sizeof(TI));
 
@@ -599,7 +623,7 @@ int QDETECTOR(_execute_align)(QDETECTOR() _q, TI _x)
     for (i=0; i<_q->nfft; i++) {
         // shifted index
         unsigned int j = (i + _q->nfft - _q->offset) % _q->nfft;
-        _q->buf_freq_1[i] = _q->buf_freq_0[i] * conjf(_q->S[j]);
+        _q->buf_freq_1[i] = _q->buf_freq_0[i] * _q->S_bar[j];
     }
     FFT_EXECUTE(_q->ifft);
     // time aligned to index 0
@@ -622,7 +646,7 @@ int QDETECTOR(_execute_align)(QDETECTOR() _q, TI _x)
 
     // estimate carrier frequency offset
     for (i=0; i<_q->nfft; i++)
-        _q->buf_time_0[i] *= i < _q->s_len ? conjf(_q->s[i]) : 0.0f;
+        _q->buf_time_0[i] *= i < _q->s_len ? _q->s_bar[i] : 0.0f;
     FFT_EXECUTE(_q->fft);
 #if DEBUG_QDETECTOR
     // debug output
