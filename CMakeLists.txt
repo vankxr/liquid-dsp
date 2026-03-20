@@ -255,8 +255,7 @@ add_library(random OBJECT
     src/random/src/randweib.c
     src/random/src/randgamma.c
     src/random/src/randnakm.c
-    src/random/src/randricek.c
-    src/random/src/scramble.c)
+    src/random/src/randricek.c)
 
 add_library(sequence OBJECT
     src/sequence/src/bsequence.c
@@ -291,10 +290,13 @@ if (C_NEON_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_crcf.neon.c
         src/dotprod/src/dotprod_rrrf.neon.c
         src/dotprod/src/sumsq.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.c)
     target_sources(vector PUBLIC
         src/vector/src/vectorf.port.c
         src/vector/src/vectorcf.neon.c)
     target_compile_options(dotprod PUBLIC ${C_NEON_FLAGS})
+    target_compile_options(random PUBLIC ${C_NEON_FLAGS})
     target_compile_options(vector PUBLIC ${C_NEON_FLAGS})
 elseif (C_AVX512_FOUND AND ENABLE_SIMD)
     target_sources(dotprod PUBLIC
@@ -302,10 +304,13 @@ elseif (C_AVX512_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_crcf.avx512f.c
         src/dotprod/src/dotprod_rrrf.avx512f.c
         src/dotprod/src/sumsq.avx512f.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.avx512f.c)
     target_sources(vector PUBLIC
-        src/vector/src/vectorf.port.c
-        src/vector/src/vectorcf.port.c)
+        src/vector/src/vectorf.avx.c
+        src/vector/src/vectorcf.avx512f.c)
     target_compile_options(dotprod PUBLIC ${C_AVX512_FLAGS})
+    target_compile_options(random PUBLIC ${C_AVX512_FLAGS})
     target_compile_options(vector PUBLIC ${C_AVX512_FLAGS})
 elseif (C_AVX2_FOUND AND ENABLE_SIMD)
     target_sources(dotprod PUBLIC
@@ -313,10 +318,13 @@ elseif (C_AVX2_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_crcf.avx.c
         src/dotprod/src/dotprod_rrrf.avx.c
         src/dotprod/src/sumsq.avx.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.avx.c)
     target_sources(vector PUBLIC
         src/vector/src/vectorf.avx.c
-        src/vector/src/vectorcf.port.c)
+        src/vector/src/vectorcf.avx.c)
     target_compile_options(dotprod PUBLIC ${C_AVX2_FLAGS})
+    target_compile_options(random PUBLIC ${C_AVX2_FLAGS})
     target_compile_options(vector PUBLIC ${C_AVX2_FLAGS})
 elseif (C_AVX_FOUND AND ENABLE_SIMD)
     target_sources(dotprod PUBLIC
@@ -324,10 +332,13 @@ elseif (C_AVX_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_crcf.avx.c
         src/dotprod/src/dotprod_rrrf.avx.c
         src/dotprod/src/sumsq.avx.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.sse.c)
     target_sources(vector PUBLIC
-        src/vector/src/vectorf.port.c
-        src/vector/src/vectorcf.port.c)
+        src/vector/src/vectorf.avx.c
+        src/vector/src/vectorcf.avx.c)
     target_compile_options(dotprod PUBLIC ${C_AVX_FLAGS})
+    target_compile_options(random PUBLIC ${C_AVX_FLAGS})
     target_compile_options(vector PUBLIC ${C_AVX_FLAGS})
 elseif (C_SSE4_FOUND AND ENABLE_SIMD)
     target_sources(dotprod PUBLIC
@@ -335,10 +346,13 @@ elseif (C_SSE4_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_crcf.sse.c
         src/dotprod/src/dotprod_rrrf.sse.c
         src/dotprod/src/sumsq.sse.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.sse.c)
     target_sources(vector PUBLIC
         src/vector/src/vectorf.port.c
-        src/vector/src/vectorcf.port.c)
+        src/vector/src/vectorcf.sse.c)
     target_compile_options(dotprod PUBLIC ${C_SSE4_FLAGS})
+    target_compile_options(random PUBLIC ${C_SSE4_FLAGS})
     target_compile_options(vector PUBLIC ${C_SSE4_FLAGS})
 elseif (C_ALTIVEC_FOUND AND ENABLE_SIMD)
     target_sources(dotprod PUBLIC
@@ -346,6 +360,8 @@ elseif (C_ALTIVEC_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_crcf.av.c
         src/dotprod/src/dotprod_rrrf.av.c
         src/dotprod/src/sumsq.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.c)
     target_sources(vector PUBLIC
         src/vector/src/vectorf.port.c
         src/vector/src/vectorcf.port.c)
@@ -356,6 +372,8 @@ else()
         src/dotprod/src/dotprod_crcf.c
         src/dotprod/src/dotprod_rrrf.c
         src/dotprod/src/sumsq.c)
+    target_sources(random PUBLIC
+        src/random/src/scramble.c)
     target_sources(vector PUBLIC
         src/vector/src/vectorf.port.c
         src/vector/src/vectorcf.port.c)

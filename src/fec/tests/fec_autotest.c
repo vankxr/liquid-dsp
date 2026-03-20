@@ -47,6 +47,9 @@ void fec_test_codec(fec_scheme _fs, unsigned int _n, void * _opts)
     case LIQUID_FEC_CONV_V29P67:
     case LIQUID_FEC_CONV_V29P78:
     case LIQUID_FEC_RS_M8:
+    case LIQUID_FEC_RS_M8_K223_CCSDS:
+    case LIQUID_FEC_RS_M8_K239_CCSDS:
+    case LIQUID_FEC_RS_M8_DVB:
         AUTOTEST_WARN("convolutional, Reed-Solomon codes unavailable (install libfec)");
         return;
     default:;
