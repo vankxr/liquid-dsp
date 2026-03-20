@@ -152,3 +152,99 @@ void autotest_vectorcf_mul_35()
     }
 }
 
+// multiply by scalar
+void autotest_vectorcf_mulscalar_4()
+{
+    float tol = 4e-6; // error tolerance
+    float complex buf_0[4] = {1.0f + 2.0f*_Complex_I, -3.0f + 4.0f*_Complex_I,
+                              5.0f - 6.0f*_Complex_I, -7.0f - 8.0f*_Complex_I};
+
+    // run vector multiplication and check result
+    float complex buf_test[4];
+    liquid_vectorcf_mulscalar(buf_0, 4, 0.6132f + 0.4144f*_Complex_I, buf_test);
+
+    CONTEND_DELTA(crealf(buf_test[0]), -0.21560001, tol);
+    CONTEND_DELTA(cimagf(buf_test[0]),  1.64080000, tol);
+    CONTEND_DELTA(crealf(buf_test[1]), -3.49720001, tol);
+    CONTEND_DELTA(cimagf(buf_test[1]),  1.20959997, tol);
+    CONTEND_DELTA(crealf(buf_test[2]),  5.55240011, tol);
+    CONTEND_DELTA(cimagf(buf_test[2]), -1.60720015, tol);
+    CONTEND_DELTA(crealf(buf_test[3]), -0.97719979, tol);
+    CONTEND_DELTA(cimagf(buf_test[3]), -7.80640030, tol);
+}
+
+void autotest_vectorcf_mulscalar_35()
+{
+    float tol = 4e-6;
+
+    float complex buf_0[35] = {
+      1.11555653 +   2.30658043*_Complex_I, -0.36133676 +  -0.10917327*_Complex_I,
+      0.17714505 +  -2.14631440*_Complex_I,  2.20424609 +   0.59063608*_Complex_I,
+     -0.44699194 +   0.23369318*_Complex_I,  0.60613931 +   0.21868288*_Complex_I,
+     -1.18746289 +  -0.52159563*_Complex_I, -0.46277775 +   0.75010157*_Complex_I,
+      0.93796307 +   0.28608151*_Complex_I, -2.18699829 +   0.38029319*_Complex_I,
+      0.16145611 +   0.18343353*_Complex_I, -0.62653631 +  -1.79037656*_Complex_I,
+     -0.67042462 +   0.11044084*_Complex_I,  0.70333438 +   1.78729174*_Complex_I,
+     -0.32923580 +   0.78514690*_Complex_I,  0.27534332 +  -0.56377431*_Complex_I,
+      0.41492559 +   1.37176526*_Complex_I,  3.25368958 +   2.70495218*_Complex_I,
+      1.63002035 +  -0.14193750*_Complex_I,  2.22057186 +   0.55056461*_Complex_I,
+      1.40896777 +   0.80722903*_Complex_I, -0.22334033 +  -0.14227395*_Complex_I,
+     -1.48631186 +   0.53610531*_Complex_I, -1.91632185 +   0.88755083*_Complex_I,
+     -0.52054895 +  -0.35572001*_Complex_I, -1.56515607 +  -0.41448794*_Complex_I,
+     -0.91107117 +   0.17059659*_Complex_I, -0.77007659 +   2.73381816*_Complex_I,
+     -0.46645585 +   0.38994666*_Complex_I,  0.80317663 +  -0.41756968*_Complex_I,
+      0.26992512 +   0.41828145*_Complex_I, -0.72456446 +   1.25002030*_Complex_I,
+      1.19573306 +   0.98449546*_Complex_I,  1.42491943 +  -0.55426305*_Complex_I,
+      1.08243614 +   0.35774368*_Complex_I, };
+
+    float complex buf_2[35] = {
+      -1.31720948 +  2.64925551*_Complex_I,
+      -0.15578990 + -0.40708598*_Complex_I,
+      2.08482647 + -1.35571086*_Complex_I,
+      1.01915121 +  2.43005633*_Complex_I,
+      -0.52938521 + -0.24288256*_Complex_I,
+      0.22888303 +  0.70801395*_Complex_I,
+      -0.36331949 + -1.45292175*_Complex_I,
+      -1.01202655 +  0.10780576*_Complex_I,
+      0.40194744 +  1.05861986*_Complex_I,
+      -1.89341557 + -1.72786224*_Complex_I,
+      -0.05332533 +  0.27709693*_Complex_I,
+      1.19165254 + -1.83782387*_Complex_I,
+      -0.57482272 + -0.53401601*_Complex_I,
+      -1.13453984 +  1.90575957*_Complex_I,
+      -0.94960880 +  0.25450662*_Complex_I,
+      0.70939368 + -0.14719996*_Complex_I,
+      -0.95906925 +  1.34866512*_Complex_I,
+      -0.16926289 +  4.88301992*_Complex_I,
+      1.28201342 +  1.38785875*_Complex_I,
+      1.06727886 +  2.41663098*_Complex_I,
+      0.25914007 +  1.85709858*_Complex_I,
+      -0.02800550 + -0.30449742*_Complex_I,
+      -1.54028666 + -0.97797626*_Complex_I,
+      -2.16517353 + -1.12210345*_Complex_I,
+      -0.04325575 + -0.72675526*_Complex_I,
+      -0.72813785 + -1.72203040*_Complex_I,
+      -0.79988205 + -0.71119618*_Complex_I,
+      -3.04041982 +  1.22972941*_Complex_I,
+      -0.68580562 + -0.15018186*_Complex_I,
+      0.94908702 +  0.43807849*_Complex_I,
+      -0.19105390 +  0.54216659*_Complex_I,
+      -1.65353560 +  0.22223699*_Complex_I,
+      -0.05346107 +  1.78774261*_Complex_I,
+      1.51346040 +  0.90908748*_Complex_I,
+      0.43866235 +  1.24118900*_Complex_I
+    };
+
+    // run vector multiplication
+    float complex buf_test[35];
+    liquid_vectorcf_mulscalar(buf_0, 35, 0.707f + 0.913f*_Complex_I, buf_test);
+
+    //compare result
+    unsigned int i;
+    for (i=0; i<35; i++) {
+        CONTEND_DELTA(crealf(buf_test[i]), crealf(buf_2[i]), tol);
+        CONTEND_DELTA(cimagf(buf_test[i]), cimagf(buf_2[i]), tol);
+    }
+}
+
+

@@ -157,6 +157,8 @@ if test "${enable_simdoverride+set}" = set; then
                    src/dotprod/src/dotprod_crcf.o \
                    src/dotprod/src/dotprod_rrrf.o \
                    src/dotprod/src/sumsq.o"
+    MLIBS_VECTOR="src/vector/src/vectorf.port.o \
+                  src/vector/src/vectorcf.port.o"
     MLIBS_RANDOM="src/random/src/scramble.o"
     ARCH_OPTION=""
 else
@@ -181,8 +183,8 @@ else
                            src/dotprod/src/dotprod_crcf.avx512f.o \
                            src/dotprod/src/dotprod_rrrf.avx512f.o \
                            src/dotprod/src/sumsq.avx512f.o"
-            MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                          src/vector/src/vectorcf.port.o"
+            MLIBS_VECTOR="src/vector/src/vectorf.avx.o \
+                          src/vector/src/vectorcf.avx512f.o"
             MLIBS_RANDOM="src/random/src/scramble.avx512f.o"
             ARCH_OPTION='-mavx512bw'
         elif [ test "$ax_cv_have_avx512f_ext" = yes ]; then
@@ -191,8 +193,8 @@ else
                            src/dotprod/src/dotprod_crcf.avx512f.o \
                            src/dotprod/src/dotprod_rrrf.avx512f.o \
                            src/dotprod/src/sumsq.avx512f.o"
-            MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                          src/vector/src/vectorcf.port.o"
+            MLIBS_VECTOR="src/vector/src/vectorf.avx.o \
+                          src/vector/src/vectorcf.avx512f.o"
             MLIBS_RANDOM="src/random/src/scramble.avx512f.o"
             ARCH_OPTION='-mavx512f'
         elif [ test "$ax_cv_have_avx2_ext" = yes ]; then
@@ -201,8 +203,8 @@ else
                            src/dotprod/src/dotprod_crcf.avx.o \
                            src/dotprod/src/dotprod_rrrf.avx.o \
                            src/dotprod/src/sumsq.avx.o"
-            MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                          src/vector/src/vectorcf.port.o"
+            MLIBS_VECTOR="src/vector/src/vectorf.avx.o \
+                          src/vector/src/vectorcf.avx.o"
             MLIBS_RANDOM="src/random/src/scramble.avx.o"
             ARCH_OPTION='-mavx2'
         elif [ test "$ax_cv_have_avx_ext" = yes ]; then
@@ -211,8 +213,8 @@ else
                            src/dotprod/src/dotprod_crcf.avx.o \
                            src/dotprod/src/dotprod_rrrf.avx.o \
                            src/dotprod/src/sumsq.avx.o"
-            MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                          src/vector/src/vectorcf.port.o"
+            MLIBS_VECTOR="src/vector/src/vectorf.avx.o \
+                          src/vector/src/vectorcf.avx.o"
             MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-mavx'
         elif [ test "$ax_cv_have_sse41_ext" = yes ]; then
@@ -222,7 +224,7 @@ else
                            src/dotprod/src/dotprod_rrrf.sse.o \
                            src/dotprod/src/sumsq.sse.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                          src/vector/src/vectorcf.port.o"
+                          src/vector/src/vectorcf.sse.o"
             MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-msse4.1'
         elif [ test "$ax_cv_have_sse3_ext" = yes ]; then
@@ -232,7 +234,7 @@ else
                            src/dotprod/src/dotprod_rrrf.sse.o \
                            src/dotprod/src/sumsq.sse.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                          src/vector/src/vectorcf.port.o"
+                          src/vector/src/vectorcf.sse.o"
             MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-msse3'
         elif [ test "$ax_cv_have_sse2_ext" = yes ]; then
@@ -284,7 +286,7 @@ else
                        src/dotprod/src/dotprod_rrrf.neon.o \
                        src/dotprod/src/sumsq.o"
         MLIBS_VECTOR="src/vector/src/vectorf.port.o \
-                      src/vector/src/vectorcf.port.o"
+                      src/vector/src/vectorcf.neon.o"
         MLIBS_RANDOM="src/random/src/scramble.o"
         case $target_os in
         darwin*)
