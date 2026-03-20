@@ -1063,10 +1063,11 @@ quantization_benchmarks :=					\
 	src/quantization/bench/quantizer_benchmark.c		\
 	src/quantization/bench/compander_benchmark.c		\
 
-# 
+#
 # MODULE : random
 #
 
+# main objects that only have portable builds
 random_objects :=						\
 	src/random/src/rand.o					\
 	src/random/src/randn.o					\
@@ -1075,10 +1076,32 @@ random_objects :=						\
 	src/random/src/randgamma.o				\
 	src/random/src/randnakm.o				\
 	src/random/src/randricek.o				\
-	src/random/src/scramble.o				\
-
 
 $(random_objects) : %.o : %.c $(include_headers)
+
+# main objects list
+random_objects +=						\
+	@MLIBS_RANDOM@						\
+
+# portable builds
+src/random/src/scramble.o : %.o : %.c $(include_headers)
+
+# specific machine architectures
+
+# AVX512-F
+src/random/src/scramble.avx512f.o : %.o : %.c $(include_headers)
+
+# AVX/AVX2
+src/random/src/scramble.avx.o : %.o : %.c $(include_headers)
+
+# SSE2/SSE3/SSE4.1/SSE4.2
+src/random/src/scramble.sse.o : %.o : %.c $(include_headers)
+
+# AltiVec
+# TODO...
+
+# ARM Neon
+# TODO...
 
 # autotests
 random_autotests :=						\

@@ -157,6 +157,7 @@ if test "${enable_simdoverride+set}" = set; then
                    src/dotprod/src/dotprod_crcf.o \
                    src/dotprod/src/dotprod_rrrf.o \
                    src/dotprod/src/sumsq.o"
+    MLIBS_RANDOM="src/random/src/scramble.o"
     ARCH_OPTION=""
 else
     # Check canonical system
@@ -174,14 +175,25 @@ else
         #   AVX512  :   immintrin.h
         AX_EXT
 
-        if [ test "$ax_cv_have_avx512f_ext" = yes ]; then
-            # AVX512 extensions
+        if [ test "$ax_cv_have_avx512bw_ext" = yes ]; then
+            # AVX512-BW extensions
             MLIBS_DOTPROD="src/dotprod/src/dotprod_cccf.avx512f.o \
                            src/dotprod/src/dotprod_crcf.avx512f.o \
                            src/dotprod/src/dotprod_rrrf.avx512f.o \
                            src/dotprod/src/sumsq.avx512f.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.avx512f.o"
+            ARCH_OPTION='-mavx512bw'
+        elif [ test "$ax_cv_have_avx512f_ext" = yes ]; then
+            # AVX512-F extensions
+            MLIBS_DOTPROD="src/dotprod/src/dotprod_cccf.avx512f.o \
+                           src/dotprod/src/dotprod_crcf.avx512f.o \
+                           src/dotprod/src/dotprod_rrrf.avx512f.o \
+                           src/dotprod/src/sumsq.avx512f.o"
+            MLIBS_VECTOR="src/vector/src/vectorf.port.o \
+                          src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.avx512f.o"
             ARCH_OPTION='-mavx512f'
         elif [ test "$ax_cv_have_avx2_ext" = yes ]; then
             # AVX2 extensions
@@ -191,6 +203,7 @@ else
                            src/dotprod/src/sumsq.avx.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.avx.o"
             ARCH_OPTION='-mavx2'
         elif [ test "$ax_cv_have_avx_ext" = yes ]; then
             # AVX extensions
@@ -200,6 +213,7 @@ else
                            src/dotprod/src/sumsq.avx.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-mavx'
         elif [ test "$ax_cv_have_sse41_ext" = yes ]; then
             # SSE4.1/2 extensions
@@ -209,6 +223,7 @@ else
                            src/dotprod/src/sumsq.sse.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-msse4.1'
         elif [ test "$ax_cv_have_sse3_ext" = yes ]; then
             # SSE3 extensions
@@ -218,6 +233,7 @@ else
                            src/dotprod/src/sumsq.sse.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-msse3'
         elif [ test "$ax_cv_have_sse2_ext" = yes ]; then
             # SSE2 extensions
@@ -227,6 +243,7 @@ else
                            src/dotprod/src/sumsq.sse.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.sse.o"
             ARCH_OPTION='-msse2'
         else
             # portable C version
@@ -236,6 +253,7 @@ else
                            src/dotprod/src/sumsq.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
+            MLIBS_RANDOM="src/random/src/scramble.o"
         fi;;
     powerpc*)
         MLIBS_DOTPROD="src/dotprod/src/dotprod_cccf.o \
@@ -244,6 +262,7 @@ else
                        src/dotprod/src/sumsq.o"
         MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                       src/vector/src/vectorcf.port.o"
+        MLIBS_RANDOM="src/random/src/scramble.o"
         ARCH_OPTION="-fno-common -faltivec";;
     armv1*|armv2*|armv3*|armv4*|armv5*|armv6*)
         # assume neon instructions are NOT available
@@ -253,6 +272,7 @@ else
                        src/dotprod/src/sumsq.o"
         MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                       src/vector/src/vectorcf.port.o"
+        MLIBS_RANDOM="src/random/src/scramble.o"
         ARCH_OPTION="-ffast-math";;
     arm|armv7*|armv8*|aarch64)
         # assume neon instructions are available
@@ -265,6 +285,7 @@ else
                        src/dotprod/src/sumsq.o"
         MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                       src/vector/src/vectorcf.port.o"
+        MLIBS_RANDOM="src/random/src/scramble.o"
         case $target_os in
         darwin*)
             # M1 mac, ARM architecture : use neon extensions
@@ -283,6 +304,7 @@ else
                        src/dotprod/src/sumsq.o"
         MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                       src/vector/src/vectorcf.port.o"
+        MLIBS_RANDOM="src/random/src/scramble.o"
         ARCH_OPTION="";;
     esac
 fi
@@ -315,8 +337,9 @@ esac
 # autoconf variable substitutions
 #
 AC_SUBST(LIBS)                      # shared libraries (-lc, -lm, etc.)
-AC_SUBST(MLIBS_DOTPROD)             # 
+AC_SUBST(MLIBS_DOTPROD)             #
 AC_SUBST(MLIBS_VECTOR)              #
+AC_SUBST(MLIBS_RANDOM)              #
 
 AC_SUBST(AR_LIB)                    # archive library
 AC_SUBST(SH_LIB)                    # output shared library target
