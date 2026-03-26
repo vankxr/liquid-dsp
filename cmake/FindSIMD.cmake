@@ -34,9 +34,27 @@ SET(AVX_CODE "
   }
 ")
 
-# TODO: distinguish between AVX and AVX2 if, at some point, AVX2-specific code
-# needs to be added.
-SET(AVX2_CODE ${AVX_CODE})
+SET(AVX2_CODE "
+  #include <immintrin.h>
+  int main()
+  {
+    char _v[32] = { -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7, -8, 8,
+                     -9, 9,-10,10,-11,11,-12,12,-13,13,-14,14,-15,15,-16,16 };
+    __m256i v = _mm256_loadu_si256((__m256i*)_v);
+    __m256i s = _mm256_abs_epi8(v); // This is an AVX2-specific instruction
+    // unload packed array
+    volatile char w[32];
+    _mm256_storeu_si256((__m256i*)w, s);
+    return (w[ 0]== 1 && w[ 1]== 1 && w[ 2]== 2 && w[ 3]== 2 &&
+            w[ 4]== 3 && w[ 5]== 3 && w[ 6]== 4 && w[ 7]== 4 &&
+            w[ 8]== 5 && w[ 9]== 5 && w[10]== 6 && w[11]== 6 &&
+            w[12]== 7 && w[13]== 7 && w[14]== 8 && w[15]== 8 &&
+            w[16]== 9 && w[17]== 9 && w[18]==10 && w[19]==10 &&
+            w[20]==11 && w[21]==11 && w[22]==12 && w[23]==12 &&
+            w[24]==13 && w[25]==13 && w[26]==14 && w[27]==14 &&
+            w[28]==15 && w[29]==15 && w[30]==16 && w[31]==16) ? 0 : 1;
+  }
+")
 
 SET(AVX512_CODE "
   #include <immintrin.h>

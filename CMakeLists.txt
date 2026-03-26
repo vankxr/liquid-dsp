@@ -379,6 +379,42 @@ else()
         src/vector/src/vectorcf.port.c)
 endif()
 
+if (C_NEON_FOUND AND ENABLE_SIMD)
+    target_compile_definitions(dotprod PUBLIC HAVE_NEON)
+    target_compile_definitions(random PUBLIC HAVE_NEON)
+    target_compile_definitions(vector PUBLIC HAVE_NEON)
+endif()
+
+if (C_AVX512_FOUND AND ENABLE_SIMD)
+    target_compile_definitions(dotprod PUBLIC HAVE_AVX512)
+    target_compile_definitions(random PUBLIC HAVE_AVX512)
+    target_compile_definitions(vector PUBLIC HAVE_AVX512)
+endif()
+
+if (C_AVX2_FOUND AND ENABLE_SIMD)
+    target_compile_definitions(dotprod PUBLIC HAVE_AVX2)
+    target_compile_definitions(random PUBLIC HAVE_AVX2)
+    target_compile_definitions(vector PUBLIC HAVE_AVX2)
+endif()
+
+if (C_AVX_FOUND AND ENABLE_SIMD)
+    target_compile_definitions(dotprod PUBLIC HAVE_AVX)
+    target_compile_definitions(random PUBLIC HAVE_AVX)
+    target_compile_definitions(vector PUBLIC HAVE_AVX)
+endif()
+
+if (C_SSE4_FOUND AND ENABLE_SIMD)
+    target_compile_definitions(dotprod PUBLIC HAVE_SSE4)
+    target_compile_definitions(random PUBLIC HAVE_SSE4)
+    target_compile_definitions(vector PUBLIC HAVE_SSE4)
+endif()
+
+if (C_ALTIVEC_FOUND AND ENABLE_SIMD)
+    target_compile_definitions(dotprod PUBLIC HAVE_ALTIVEC)
+    target_compile_definitions(random PUBLIC HAVE_ALTIVEC)
+    target_compile_definitions(vector PUBLIC HAVE_ALTIVEC)
+endif()
+
 # ---------------------------------------- main library ----------------------------------------
 
 add_library(${LIBNAME}
