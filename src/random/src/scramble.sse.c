@@ -24,13 +24,7 @@
 // Scramble (SSE SIMD version)
 //
 
-#if HAVE_SSE2
-#include <emmintrin.h>
-#endif
-
-#if HAVE_SSE4_1
-#include <smmintrin.h>
-#endif
+#include <pmmintrin.h>
 
 #include "liquid.internal.h"
 
@@ -77,8 +71,6 @@ void unscramble_data(unsigned char * _x,
 void unscramble_data_soft(unsigned char * _x,
                           unsigned int _n)
 {
-
-#if HAVE_SSE4_1
     // t = 4*(floor(_n/4))
     unsigned int t = (_n >> 2) << 2;
 
@@ -105,11 +97,6 @@ void unscramble_data_soft(unsigned char * _x,
     }
 
     for (; i<_n; i++) {
-#else
-    // apply static masks
-    unsigned int i;
-    for (i=0; i<_n; i++) {
-#endif
         unsigned char mask;
 
         switch ( i % 4 ) {

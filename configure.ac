@@ -215,7 +215,7 @@ else
                            src/dotprod/src/sumsq.avx.o"
             MLIBS_VECTOR="src/vector/src/vectorf.avx.o \
                           src/vector/src/vectorcf.avx.o"
-            MLIBS_RANDOM="src/random/src/scramble.sse.o"
+            MLIBS_RANDOM="src/random/src/scramble.avx.o"
             ARCH_OPTION='-mavx'
         elif [ test "$ax_cv_have_sse41_ext" = yes ]; then
             # SSE4.1/2 extensions
@@ -245,7 +245,7 @@ else
                            src/dotprod/src/sumsq.sse.o"
             MLIBS_VECTOR="src/vector/src/vectorf.port.o \
                           src/vector/src/vectorcf.port.o"
-            MLIBS_RANDOM="src/random/src/scramble.sse.o"
+            MLIBS_RANDOM="src/random/src/scramble.o"
             ARCH_OPTION='-msse2'
         else
             # portable C version

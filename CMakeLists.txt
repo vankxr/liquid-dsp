@@ -333,7 +333,7 @@ elseif (C_AVX_FOUND AND ENABLE_SIMD)
         src/dotprod/src/dotprod_rrrf.avx.c
         src/dotprod/src/sumsq.avx.c)
     target_sources(random PUBLIC
-        src/random/src/scramble.sse.c)
+        src/random/src/scramble.avx.c)
     target_sources(vector PUBLIC
         src/vector/src/vectorf.avx.c
         src/vector/src/vectorcf.avx.c)
